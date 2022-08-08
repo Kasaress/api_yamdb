@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 
+# коммент для проверки слияния
 ROLE_CHOICES = (
     ('user', 'user'),
     ('moderator', 'moderator'),

@@ -1,7 +1,7 @@
+from api.utils import generate_confirmation_code
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 
-# коммент для проверки слияния
 ROLE_CHOICES = (
     ('user', 'user'),
     ('moderator', 'moderator'),
@@ -64,6 +64,10 @@ class CustomUser(AbstractUser):
         choices=ROLE_CHOICES,
         default='user'
     )
+    confirmation_code = models.CharField(
+        max_length=15, null=True,
+        verbose_name='Код подтверждения'
+    )
 
     objects = CustomUserManager()
-    
+

@@ -12,18 +12,14 @@ User = get_user_model()
 
 
 class RegisterView(APIView):
-    permission_classes = [AllowAny,]
+    permission_classes = [AllowAny]
 
     def post(self, request):
         email = request.data.get('email')
         username = request.data.get('username')
         user = User.objects.filter(email=email, username=username)
         if len(user) > 0:
-            if user.confirmation_code:
-                send_confirmation_code(email, user.confirmation_code)
-            else:
-                confirmation_code = generate_confirmation_code()
-                send_confirmation_code(email, user.confirmation_code)
+            confirmation_code = user.confirmation_code
         else:
             confirmation_code = generate_confirmation_code()
             data = {'email': email, 'confirmation_code': confirmation_code,

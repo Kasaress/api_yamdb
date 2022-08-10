@@ -76,14 +76,24 @@ class CustomUser(AbstractUser):
     objects = CustomUserManager()
 
     class Meta:
+        ordering = ('id',)
         constraints = [
             models.UniqueConstraint(
                 fields=['username', 'email'],
                 name='unique_name'
             ),
         ]
+    @property
+    def is_moderator(self):
+        return self.role == ROLE_CHOICES.moderator
 
-    # def __str__(self):
-    #     """ Строковое представление модели (отображается в консоли) """
-    #     return self.email
+    @property
+    def is_admin(self):
+        return (
+            self.role == ROLE_CHOICES.admin
+        )    
+
+    def __str__(self):
+        """ Строковое представление модели (отображается в консоли) """
+        return self.email
 

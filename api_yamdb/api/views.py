@@ -1,13 +1,15 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .permissions import IsAdmin
-from .serializers import SignUpSerializer, TokenSerializer, UserSerializer
+from .serializers import (AuthorSerializer, SignUpSerializer, TokenSerializer,
+                          UserSerializer)
 from .utils import generate_confirmation_code, send_confirmation_code
 
 User = get_user_model()
@@ -61,8 +63,31 @@ class TokenView(APIView):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated, IsAdmin, ]
+    permission_classes = [IsAdmin, ]
     lookup_field = 'username'
     search_fields = ('username', )
 
 
+class MeView(APIView):
+    def get(self, request):
+        if request.user.is_authenticated:
+            user = get_object_or_404(User, id=request.user.id)
+            serializer = UserSerializer(user)
+            return Response(serializer.data)
+        return Response('Вы не авторизованы', status=status.HTTP_401_UNAUTHORIZED)
+
+    def patch(self, request):
+        if request.user.is_authenticated:
+            user = get_object_or_404(User, id=request.user.id)
+            if request.user.role == 'admin':
+                serializer = UserSerializer(user, data=request.data, partial=True)
+                if serializer.is_valid():
+                    serializer.save()
+                    return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                serializer = AuthorSerializer(user, data=request.data, partial=True)
+                if serializer.is_valid():
+                    serializer.save()
+                    return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response('Вы не авторизованы', status=status.HTTP_401_UNAUTHORIZED)

@@ -1,11 +1,20 @@
 from rest_framework import permissions
 
 
+class IsAdminOrSuperuser(permissions.BasePermission):
+    message = 'Нужны права SuperUser или admin'
+
+    def has_permission(self, request, view):
+        if request.user.is_authenticated:
+            return request.user.is_superuser or request.user.is_admin
+
+
 class IsSuperuser(permissions.BasePermission):
     message = 'Нужны права SuperUser'
 
     def has_permission(self, request, view):
-        return request.user.is_superuser
+        if request.user.is_authenticated:
+            return request.user.is_superuser
 
 
 class IsAdmin(permissions.BasePermission):
@@ -13,7 +22,7 @@ class IsAdmin(permissions.BasePermission):
 
     def has_permission(self, request, view):
         if request.user.is_authenticated:
-            return request.user.role == 'admin'
+            return request.user.role == 'admin' or request.user.is_superuser
 
 
 class IsModerator(permissions.BasePermission):

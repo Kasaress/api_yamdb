@@ -18,17 +18,20 @@ class RegisterView(APIView):
 
     def post(self, request):
         serializer = SignUpSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        email = request.data.get('email')
-        username = request.data.get('username')
-        user = get_object_or_404(User, username=username, email=email)
-        confirmation_code = generate_confirmation_code()
-        user.password = confirmation_code
-        user.confirmation_code = confirmation_code
-        user.save()
-        send_confirmation_code(email, confirmation_code)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        serializer.is_valid()
+        email = serializer.validated_data.get('email')
+        username = serializer.validated_data.get('username')
+        if serializer.is_valid():
+            confirmation_code = generate_confirmation_code()
+            user = User.objects.filter(email=email).exists()
+            if not user:
+                User.objects.create_user(email=email, username=username)
+                User.objects.filter(email=email).update(
+                confirmation_code = generate_confirmation_code())
+                send_confirmation_code(email, confirmation_code)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response('Такой пользователь уже зарегистирован', status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class TokenView(APIView):
@@ -37,7 +40,6 @@ class TokenView(APIView):
     def post(self, request):
         serializer = TokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        data = serializer.validated_data
         username = request.data.get('username')
         confirmation_code = request.data.get('confirmation_code')
         user = get_object_or_404(

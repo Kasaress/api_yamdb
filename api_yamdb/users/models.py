@@ -75,6 +75,14 @@ class CustomUser(AbstractUser):
     # REQUIRED_FIELDS = ['username', 'email']
     objects = CustomUserManager()
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['username', 'email'],
+                name='unique_name'
+            ),
+        ]
+
     # def __str__(self):
     #     """ Строковое представление модели (отображается в консоли) """
     #     return self.email

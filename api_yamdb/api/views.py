@@ -2,7 +2,6 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from rest_framework import mixins, status, viewsets
 from rest_framework.pagination import PageNumberPagination
-# from rest_framework import status, viewsets
 from rest_framework.permissions import (AllowAny, IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
@@ -98,6 +97,8 @@ class MeView(APIView):
                     return Response(serializer.data, status=status.HTTP_200_OK)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response('Вы не авторизованы', status=status.HTTP_401_UNAUTHORIZED)
+
+
 class CLDMixinSet(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,

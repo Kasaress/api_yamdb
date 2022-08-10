@@ -1,4 +1,4 @@
-from api.utils import generate_confirmation_code
+import jwt
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 
@@ -10,13 +10,16 @@ ROLE_CHOICES = (
 
 
 class CustomUserManager(BaseUserManager):
-    def create_user(self, email, username, password, **other_fields):
+    def create_user(self, username, email, password=None, **other_fields):
         if not email:
             raise ValueError('Укажите адрес электронной почты')
         if not username:
-            raise ValueError('Придумайте username')   
-        email = self.normalize_email(email)
-        user = self.model(email=email, username=username, **other_fields)
+            raise ValueError('Придумайте username')
+        user = self.model(
+            email=self.normalize_email(email),
+            username=username,
+            **other_fields
+        )
         user.set_password(password)
         user.save()
         return user
@@ -65,9 +68,14 @@ class CustomUser(AbstractUser):
         default='user'
     )
     confirmation_code = models.CharField(
-        max_length=15, null=True,
+        max_length=5, null=True,
         verbose_name='Код подтверждения'
     )
-
+    # USERNAME_FIELD = 'email'  # Поле для входа в систему
+    # REQUIRED_FIELDS = ['username', 'email']
     objects = CustomUserManager()
+
+    # def __str__(self):
+    #     """ Строковое представление модели (отображается в консоли) """
+    #     return self.email
 

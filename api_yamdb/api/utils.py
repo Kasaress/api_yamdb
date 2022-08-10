@@ -2,7 +2,7 @@ import random
 
 from django.core.mail import send_mail
 
-CODE_LEN = 15
+CODE_LEN = 5
 
 def send_confirmation_code(email, confirmation_code):
     send_mail(
@@ -14,8 +14,8 @@ def send_confirmation_code(email, confirmation_code):
 
 
 def generate_confirmation_code():
-    symbols = 'quFDGDbtwehykjahuhufHFCUHNCWEHAFDONCJUHU1234567890'
+    digs = '1234567890'
     code = ''
     for _ in range(CODE_LEN):
-        code += random.choice(symbols)
+        code += random.choice(digs)
     return code

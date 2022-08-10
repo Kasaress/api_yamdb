@@ -1,18 +1,25 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-from rest_framework import status, viewsets
+from rest_framework import mixins, status, viewsets
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import AllowAny
+# from rest_framework import status, viewsets
+from rest_framework.permissions import (AllowAny, IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from reviews.models import Category, Genre, Title
 
 from .permissions import IsAdmin
-from .serializers import (AuthorSerializer, SignUpSerializer, TokenSerializer,
-                          UserSerializer)
+from .serializers import (AuthorSerializer, CategorySerializer,
+                          GenreSerializer, SignUpSerializer,
+                          TitleReadSerializer, TitleWriteSerializer,
+                          TokenSerializer, UserSerializer)
 from .utils import generate_confirmation_code, send_confirmation_code
 
 User = get_user_model()
+
+PERMISSION_CLASS = [IsAuthenticatedOrReadOnly, IsAdmin]
 
 
 class RegisterView(APIView):
@@ -91,3 +98,45 @@ class MeView(APIView):
                     return Response(serializer.data, status=status.HTTP_200_OK)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response('Вы не авторизованы', status=status.HTTP_401_UNAUTHORIZED)
+class CLDMixinSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet
+):
+    pass
+
+
+class GenreViewSet(CLDMixinSet):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    permission_classes = PERMISSION_CLASS
+    pagination_class = PageNumberPagination
+    search_fields = ('name',)
+    lookup_field = "slug"
+    # filter_backends = DjangoFilterBackend
+
+
+class CategoryViewSet(CLDMixinSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = PERMISSION_CLASS
+    pagination_class = PageNumberPagination
+    search_fields = ('=name',)
+    lookup_field = "slug"
+    # filter_backends =
+
+
+class TitleViewSet(CLDMixinSet):
+    queryset = Title.objects.all()  # .annotate(Avg('reviews__score'))
+    # annotate(rating=Avg('reviews__score')).order_by('name')
+    permission_classes = PERMISSION_CLASS
+    pagination_class = PageNumberPagination
+    search_fields = ('=name',)
+    lookup_field = "slug"
+    # filter_backends = DjangoFilterBackend
+
+    def get_serializer_class(self):
+        if self.action in ('list', 'retrieve'):
+            return TitleReadSerializer
+        return TitleWriteSerializer

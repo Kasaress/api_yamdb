@@ -1,4 +1,13 @@
+import datetime as dt
 from django.db import models
+from django.core.exceptions import ValidationError
+
+
+def validate_year(value):
+    year = dt.date.today().year
+    if value > year:
+        raise ValidationError('Проверьте указанный год')
+    return value
 
 
 class Genre(models.Model):
@@ -8,7 +17,7 @@ class Genre(models.Model):
 
     class Meta:
         verbose_name = 'Жанр'
-        ordering = ('id',)
+        ordering = ['name']
 
     def __str__(self):
         return self.name
@@ -21,13 +30,16 @@ class Category(models.Model):
 
     class Meta:
         verbose_name = 'Категория'
-        ordering = ('id',)
+        ordering = ['name']
 
 
 class Title(models.Model):
     """Произведения."""
     name = models.CharField(max_length=150)
-    year = models.PositiveIntegerField()
+    year = models.PositiveIntegerField(
+        validators=[validate_year],
+        verbose_name='Год'
+    )
     description = models.TextField(blank=True)
     category = models.ForeignKey(
         Category,
@@ -47,7 +59,7 @@ class Title(models.Model):
 
     class Meta:
         verbose_name = 'Произведение'
-        ordering = ('id',)
+        ordering = ['name']
 
     def __str__(self):
         return self.name

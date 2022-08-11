@@ -1,7 +1,9 @@
+import datetime as dt
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from reviews.models import Category, Genre, Title
+from django.core.validators import MaxValueValidator
 
 User = get_user_model()
 
@@ -78,14 +80,14 @@ class AuthorSerializer(serializers.ModelSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = '__all__'
+        fields = ('name', 'slug')
         lookup_field = 'slug'
 
 
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genre
-        fields = '__all__'
+        fields = ('name', 'slug')
         lookup_field = 'slug'
 
 
@@ -98,7 +100,8 @@ class TitleReadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Title
-        fields = '__all__'
+        fields = ('id', 'name', 'description', 'category',
+                  'genre', 'year', 'rating')
 
 
 class TitleWriteSerializer(serializers.ModelSerializer):
@@ -109,8 +112,17 @@ class TitleWriteSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Category.objects.all())
-    year = serializers.IntegerField()
+    year = serializers.IntegerField(
+        validators=[MaxValueValidator(dt.date.today().year)]
+    )
 
     class Meta:
         model = Title
-        fields = '__all__'
+        fields = ('id', 'name', 'description', 'category',
+                  'genre', 'year')
+
+    def validate_year(self, value):
+        year = dt.date.today().year
+        if value > year:
+            raise serializers.ValidationError('Неверный год')
+        return value

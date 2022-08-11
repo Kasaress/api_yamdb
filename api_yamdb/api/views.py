@@ -115,7 +115,6 @@ class GenreViewSet(CLDMixinSet):
     pagination_class = PageNumberPagination
     search_fields = ('name',)
     lookup_field = "slug"
-    # filter_backends = DjangoFilterBackend
 
 
 class CategoryViewSet(CLDMixinSet):
@@ -125,17 +124,16 @@ class CategoryViewSet(CLDMixinSet):
     pagination_class = PageNumberPagination
     search_fields = ('=name',)
     lookup_field = "slug"
-    # filter_backends =
 
 
 class TitleViewSet(CLDMixinSet):
     queryset = Title.objects.all()  # .annotate(Avg('reviews__score'))
     # annotate(rating=Avg('reviews__score')).order_by('name')
+    ordering_fields = ('year', 'name')
     permission_classes = PERMISSION_CLASS
     pagination_class = PageNumberPagination
     search_fields = ('=name',)
     lookup_field = "slug"
-    # filter_backends = DjangoFilterBackend
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):

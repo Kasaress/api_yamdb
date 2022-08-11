@@ -2,8 +2,7 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from rest_framework import mixins, status, viewsets
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import (AllowAny, IsAuthenticated,
-                                        IsAuthenticatedOrReadOnly)
+from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -22,6 +21,7 @@ PERMISSION_CLASS = [IsAuthenticatedOrReadOnly, IsAdmin]
 
 
 class RegisterView(APIView):
+    """Регистирирует пользователя и отправляет ему код подтверждения."""
     permission_classes = (AllowAny,)
 
     def post(self, request):
@@ -35,14 +35,17 @@ class RegisterView(APIView):
             if not user:
                 User.objects.create_user(email=email, username=username)
                 User.objects.filter(email=email).update(
-                confirmation_code = generate_confirmation_code())
+                    confirmation_code=generate_confirmation_code())
                 send_confirmation_code(email, confirmation_code)
                 return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response('Такой пользователь уже зарегистирован', status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                'Такой пользователь уже зарегистирован',
+                status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class TokenView(APIView):
+    """Проверяет код подтверждения и отправляет токен."""
     permission_classes = (AllowAny,)
 
     def post(self, request):
@@ -67,6 +70,7 @@ class TokenView(APIView):
 
 
 class UserViewSet(viewsets.ModelViewSet):
+    """Админ получает список пользователей или создает нового"""
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAdmin, ]
@@ -75,28 +79,41 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 class MeView(APIView):
+    """Пользователь может посмотреть свой профиль и изменить его"""
     def get(self, request):
         if request.user.is_authenticated:
             user = get_object_or_404(User, id=request.user.id)
             serializer = UserSerializer(user)
             return Response(serializer.data)
-        return Response('Вы не авторизованы', status=status.HTTP_401_UNAUTHORIZED)
+        return Response(
+            'Вы не авторизованы',
+            status=status.HTTP_401_UNAUTHORIZED)
 
     def patch(self, request):
         if request.user.is_authenticated:
             user = get_object_or_404(User, id=request.user.id)
             if request.user.role == 'admin':
-                serializer = UserSerializer(user, data=request.data, partial=True)
+                serializer = UserSerializer(
+                    user,
+                    data=request.data,
+                    partial=True)
                 if serializer.is_valid():
                     serializer.save()
                     return Response(serializer.data, status=status.HTTP_200_OK)
             else:
-                serializer = AuthorSerializer(user, data=request.data, partial=True)
+                serializer = AuthorSerializer(
+                    user,
+                    data=request.data,
+                    partial=True)
                 if serializer.is_valid():
                     serializer.save()
                     return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response('Вы не авторизованы', status=status.HTTP_401_UNAUTHORIZED)
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            'Вы не авторизованы',
+            status=status.HTTP_401_UNAUTHORIZED)
 
 
 class CLDMixinSet(

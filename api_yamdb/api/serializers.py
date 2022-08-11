@@ -7,6 +7,9 @@ User = get_user_model()
 
 
 class SignUpSerializer(serializers.ModelSerializer):
+    """Сериалайзер для регистрации.
+       Следит за уникальностью полей email и username,
+       валидирует username"""
     email = serializers.EmailField(
         max_length=254, required=True,
         validators=[UniqueValidator(queryset=User.objects.all())])
@@ -20,15 +23,18 @@ class SignUpSerializer(serializers.ModelSerializer):
             'email',
             'username')
 
-    def validate_username(self, name):
-        if name == 'me':
+    def validate_username(self, username):
+        if username == 'me':
             raise serializers.ValidationError(
-                "Использовать 'me' для username нельзя."
+                "Использовать слово 'me' для username нельзя."
             )
-        return name  
+        return username
 
 
 class TokenSerializer(serializers.ModelSerializer):
+    """Сериалайзер для получения токена.
+       Проверяет наличие username и валидирует
+       код подтверждения."""
     username = serializers.CharField(
         required=True)
     confirmation_code = serializers.CharField(
@@ -49,15 +55,16 @@ class TokenSerializer(serializers.ModelSerializer):
             )
         return data
 
-    def validate_username(self, value):
-        if not value:
+    def validate_username(self, username):
+        if not username:
             raise serializers.ValidationError(
                 "Поле username не должно быть пустым"
             )
-        return value
+        return username
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """Сериализатор для кастомной модели пользователя"""
     class Meta:
         model = User
         fields = (
@@ -67,6 +74,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class AuthorSerializer(serializers.ModelSerializer):
+    """Сериализатор для изменения профиля автором"""
     class Meta:
         model = User
         fields = (
@@ -74,7 +82,7 @@ class AuthorSerializer(serializers.ModelSerializer):
             'last_name', 'bio', 'role')
         read_only_fields = ('role',)
 
-        
+
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category

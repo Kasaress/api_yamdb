@@ -1,23 +1,23 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-from rest_framework import mixins, status, viewsets
+from rest_framework import filters, mixins, status, viewsets
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import (AllowAny, IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-from reviews.models import Category, Genre, Title
+from reviews.models import Category, Comment, Genre, Review, Title
 
-from .permissions import IsAdmin
+from .permissions import IsAdmin, IsAdminOrReadOnly
 from .serializers import (AuthorSerializer, CategorySerializer,
-                          GenreSerializer, SignUpSerializer,
-                          TitleReadSerializer, TitleWriteSerializer,
-                          TokenSerializer, UserSerializer)
+                          CommentSerializer, GenreSerializer, ReviewSerializer,
+                          SignUpSerializer, TitleReadSerializer,
+                          TitleWriteSerializer, TokenSerializer,
+                          UserSerializer)
 from .utils import generate_confirmation_code, send_confirmation_code
 
 User = get_user_model()
-
-PERMISSION_CLASS = [IsAuthenticatedOrReadOnly, IsAdmin]
 
 
 class RegisterView(APIView):
@@ -128,33 +128,46 @@ class CLDMixinSet(
 class GenreViewSet(CLDMixinSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = PERMISSION_CLASS
+    permission_classes = [IsAdminOrReadOnly]
     pagination_class = PageNumberPagination
     search_fields = ('name',)
-    lookup_field = "slug"
-    # filter_backends = DjangoFilterBackend
+    filter_backends = [filters.SearchFilter]
+    lookup_field = 'slug'
 
 
 class CategoryViewSet(CLDMixinSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = PERMISSION_CLASS
+    permission_classes = [IsAdminOrReadOnly]
     pagination_class = PageNumberPagination
     search_fields = ('=name',)
     lookup_field = "slug"
-    # filter_backends =
+    filter_backends = [filters.SearchFilter]
 
 
-class TitleViewSet(CLDMixinSet):
-    queryset = Title.objects.all()  # .annotate(Avg('reviews__score'))
-    # annotate(rating=Avg('reviews__score')).order_by('name')
-    permission_classes = PERMISSION_CLASS
+class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.all()
+    permission_classes = [IsAdminOrReadOnly]
     pagination_class = PageNumberPagination
-    search_fields = ('=name',)
-    lookup_field = "slug"
-    # filter_backends = DjangoFilterBackend
+    filter_backends = [filters.SearchFilter]
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):
             return TitleReadSerializer
         return TitleWriteSerializer
+
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    queryset = Review.objects.all()
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    pagination_class = PageNumberPagination
+    filter_backends = [filters.SearchFilter]
+    serializer_class = ReviewSerializer
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    queryset = Comment.objects.all()
+    permission_classes = [IsAdminOrReadOnly]
+    pagination_class = PageNumberPagination
+    filter_backends = [filters.SearchFilter]
+    serializer_class = CommentSerializer

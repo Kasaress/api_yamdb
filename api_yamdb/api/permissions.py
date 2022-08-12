@@ -4,17 +4,17 @@ from rest_framework import permissions
 class IsAdminOrSuperuser(permissions.BasePermission):
     message = 'Нужны права SuperUser или admin'
 
-    def has_permission(self, request, view):
+    def has_permission(self, request, view) -> bool:
         if request.user.is_authenticated:
-            return request.user.is_superuser or request.user.is_admin
+            return bool(request.user.is_superuser or request.user.is_admin)
 
 
 class IsSuperuser(permissions.BasePermission):
     message = 'Нужны права SuperUser'
 
-    def has_permission(self, request, view):
+    def has_permission(self, request, view) -> bool:
         if request.user.is_authenticated:
-            return request.user.is_superuser
+            return bool(request.user.is_superuser)
 
 
 class IsAdmin(permissions.BasePermission):
@@ -35,7 +35,7 @@ class IsModerator(permissions.BasePermission):
 
 class IsAuthor(permissions.BasePermission):
     message = 'Для этого нужно быть автором, администратором, или модератором'
-    
+
     def has_object_permission(self, request, view, obj):
         if request.user.is_authenticated:
             return obj.author == request.user
@@ -48,5 +48,3 @@ class IsAdminOrReadOnly(permissions.BasePermission):
         return (request.method in permissions.SAFE_METHODS
                 or (request.user.is_authenticated and (
                     request.user.is_admin or request.user.is_superuser)))
-
-

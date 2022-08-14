@@ -4,6 +4,7 @@ from django.db import models
 
 User = get_user_model()
 
+
 class Genre(models.Model):
     """Жанры произведений."""
     name = models.CharField(max_length=150)
@@ -72,23 +73,46 @@ class GenreTitle(models.Model):
 class Review(models.Model):
     """Отзывы."""
     text = models.TextField(max_length=3000)
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviews')
-    score = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)])
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='reviews')
+    score = models.IntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(10)],
+        error_messages={'validators': 'Оценка от 1 до 10!'})
     pub_date = models.DateTimeField(auto_now_add=True)
-    title = models.ForeignKey(Title, on_delete=models.CASCADE, related_name='reviews')
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE,
+        related_name='reviews')
 
     class Meta:
         verbose_name = 'Отзывы'
-        ordering = ('id',)
+        ordering = ('pub_date',)
+        constraints = [
+            models.UniqueConstraint(
+                fields=["author", "title"], name="unique_review")]
+
+    def __str__(self):
+        return self.text
 
 
 class Comment(models.Model):
     """Комментарии."""
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
-    review = models.ForeignKey(Review, on_delete=models.CASCADE, related_name="comments")
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="comments")
+    review = models.ForeignKey(
+        Review,
+        on_delete=models.CASCADE,
+        related_name="comments")
     text = models.TextField()
     pub_date = models.DateTimeField(auto_now_add=True, db_index=True)
 
     class Meta:
         verbose_name = 'Комментарии'
-        ordering = ('id',)
+        ordering = ('pub_date',)
+
+    def __str__(self):
+        return self.text

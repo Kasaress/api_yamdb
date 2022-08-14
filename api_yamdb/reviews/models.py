@@ -1,8 +1,18 @@
+import datetime as dt
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 User = get_user_model()
+
+
+def validate_year(value):
+    if value > dt.datetime.now().year:
+        raise ValidationError(
+            'Значение года не может быть больше текущего')
+    return value
+
 
 class Genre(models.Model):
     """Жанры произведений."""
@@ -30,7 +40,10 @@ class Category(models.Model):
 class Title(models.Model):
     """Произведения."""
     name = models.CharField(max_length=150)
-    year = models.PositiveIntegerField()
+    year = models.PositiveIntegerField(
+        validators=[validate_year],
+        verbose_name='Год выпуска'
+    )
     description = models.TextField(blank=True)
     category = models.ForeignKey(
         Category,

@@ -1,7 +1,7 @@
-from django.contrib.auth.models import AbstractUser, BaseUserManager
+
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-# коммент для проверки слияния
 ROLE_CHOICES = (
     ('user', 'user'),
     ('moderator', 'moderator'),
@@ -9,61 +9,54 @@ ROLE_CHOICES = (
 )
 
 
-class CustomUserManager(BaseUserManager):
-    def create_user(self, email, username, password, **other_fields):
-        if not email:
-            raise ValueError('Укажите адрес электронной почты')
-        if not username:
-            raise ValueError('Придумайте username')   
-        email = self.normalize_email(email)
-        user = self.model(email=email, username=username, **other_fields)
-        user.set_password(password)
-        user.save()
-        return user
-
-    def create_superuser(self, email, username, password, **other_fields):
-        if not email:
-            raise ValueError('Укажите адрес электронной почты')
-        if not username:
-            raise ValueError('Придумайте username')
-        user = self.model(email=email, username=username,
-                          is_staff=True, is_superuser=True, **other_fields)
-        user.set_password(password)
-        user.save()
-        return user
-
-
-class CustomUser(AbstractUser):
-    username = models.CharField(
+class CustomUser(AbstractUser):  # type: ignore
+    """Кастомная модель User.
+       Позволяет при создании запрашивать емейл и юзернейм.
+    """
+    username: str = models.CharField(
         'Username',
         unique=True,
         blank=False,
         max_length=150,
     )
-    email = models.EmailField(
+    email: str = models.EmailField(
         'E-mail address',
         unique=True,
         blank=False,
     )
-    first_name = models.CharField(
+    first_name: str = models.CharField(
         'first name',
         max_length=150,
         blank=True
     )
-    last_name = models.CharField(
+    last_name: str = models.CharField(
         'last name',
         max_length=150,
         blank=True
     )
-    bio = models.TextField(
-        'Биография пользователя?',
+    bio: str = models.TextField(
+        'Биография пользователя',
         blank=True
     )
-    role = models.CharField(
+    role: str = models.CharField(
         max_length=9,
         choices=ROLE_CHOICES,
         default='user'
     )
+    confirmation_code: int = models.CharField(
+        max_length=5, null=True,
+        verbose_name='Код подтверждения'
+    )
 
-    objects = CustomUserManager()
-    
+    class Meta:
+        ordering = ('id',)
+        constraints = [
+            models.UniqueConstraint(
+                fields=['username', 'email'],
+                name='unique_name'
+            ),
+        ]
+
+    def __str__(self) -> str:
+        """Строковое представление модели (отображается в консоли)."""
+        return self.username

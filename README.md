@@ -2,25 +2,25 @@
 
 ![Logo](https://cdn-irec.r-99.com/sites/default/files/product-images/399872/EOXOqQkXnjTMTRnIpMUSvQ.jpg)
 
-Проект YaMDb собирает отзывы (Review) пользователей на произведения (Titles). Произведения делятся на категории: «Книги», «Фильмы», «Музыка». 
-Сами произведения в YaMDb не хранятся, здесь нельзя посмотреть фильм или послушать музыку.
-В каждой категории есть произведения: книги, фильмы или музыка
-Произведению может быть присвоен жанр (Genre) из списка предустановленных (например, «Сказка», «Рок» или «Артхаус»). Новые жанры может создавать только администратор.
-Благодарные или возмущённые пользователи оставляют к произведениям текстовые отзывы (Review) и ставят произведению оценку в диапазоне от одного до десяти из пользовательских оценок формируется рейтинг (целое число). 
+The YaMDb project collects reviews (Review) of users on works (Titles). The works are divided into categories: "Books", "Films", "Music".
+The works themselves are not stored in YaMDb; you cannot watch a movie or listen to music here.
+There are works in each category: books, films or music
+A work can be assigned a genre (Genre) from the list of preset ones (for example, "Fairy Tale", "Rock" or "Arthouse"). New genres can only be created by the administrator.
+Grateful or indignant users leave text reviews (Review) for the works and rate the product in the range from one to ten; a rating (integer) is formed from the user ratings. 
 
-Настройка и запуск сервера:
-Cоздать и активировать виртуальное окружение:
+Setting up and starting the server:
+Create and activate virtual environment:
 _python -m venv venv_
 _Source venv/Scripts/activate_
-Установить зависимости из файла requirements.txt:
+Install dependencies from a file requirements.txt:
 _pip install -r requirements.txt_	
-Перейти в основную папку и выполнить миграции:
+Go to main folder and run migrations:
 _cd api_yamdb_
-Выполнить миграцию:
+Run Migration:
 _python manage.py migrate_
-Запустить проект:
+Start project:
 _python manage.py runserver_
-ЗАВИСИМОСТИ:
+DEPENDENCIES:
 _Request==2.26.0
 Django==2.2.16
 Djangorestframework==3.12.4
@@ -30,7 +30,7 @@ Pytest-django==4.4.0
 Pytest-pythonpath==0.7.3
 Django-filter==2.2.0
 Djangorestframework-simplejwt=5.2.0_
-ТЕХНОЛОГИИ:
+TECHNOLOGY:
 _Python 3.8
 Django 2.2.16
 Djangorestframework 3.12.4

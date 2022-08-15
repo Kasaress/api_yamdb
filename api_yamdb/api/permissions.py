@@ -1,23 +1,8 @@
 from rest_framework import permissions
 
 
-class IsAdminOrSuperuser(permissions.BasePermission):
-    message = 'Нужны права SuperUser или admin'
-
-    def has_permission(self, request, view) -> bool:
-        if request.user.is_authenticated:
-            return bool(request.user.is_superuser or request.user.is_admin)
-
-
-class IsSuperuser(permissions.BasePermission):
-    message = 'Нужны права SuperUser'
-
-    def has_permission(self, request, view) -> bool:
-        if request.user.is_authenticated:
-            return bool(request.user.is_superuser)
-
-
 class IsAdmin(permissions.BasePermission):
+    """Проверка прав администратора."""
     message = 'Нужны права администратора'
 
     def has_permission(self, request, view):
@@ -25,26 +10,32 @@ class IsAdmin(permissions.BasePermission):
             return request.user.role == 'admin' or request.user.is_superuser
 
 
-class IsModerator(permissions.BasePermission):
-    message = 'Нужны права модератора'
-
-    def has_permission(self, request, view):
-        if request.user.is_authenticated:
-            return request.user.role == 'moderator'
-
-
-class IsAuthor(permissions.BasePermission):
-    message = 'Для этого нужно быть автором, администратором, или модератором'
-
-    def has_object_permission(self, request, view, obj):
-        if request.user.is_authenticated:
-            return obj.author == request.user
-
-
 class IsAdminOrReadOnly(permissions.BasePermission):
-    message = 'Нужны права администратора'
+    """Проверка прав администратора."""
+    message = 'Нужны права администратора.'
 
     def has_permission(self, request, view):
         return (request.method in permissions.SAFE_METHODS
                 or (request.user.is_authenticated and (
-                    request.user.is_admin or request.user.is_superuser)))
+                    request.user.role == 'admin'
+                    or request.user.is_superuser)))
+
+
+class IsAdminOrModeratirOrAuthor(permissions.BasePermission):
+    """"Проверка прав для отзывов и комментариев."""
+    message = 'Нужны права администратора/модератора или автора'
+
+    def has_permission(self, request, view):
+        return (
+            request.method in permissions.SAFE_METHODS
+            or request.user.is_authenticated
+        )
+
+    def has_object_permission(self, request, view, obj):
+        return (
+            request.method in permissions.SAFE_METHODS
+            or request.user.is_superuser
+            or request.user.role == 'admin'
+            or request.user.role == 'moderator'
+            or request.user == obj.author
+        )

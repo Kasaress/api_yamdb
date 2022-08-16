@@ -45,7 +45,7 @@ class Title(models.Model):
         validators=[validate_year],
         verbose_name='Год выпуска'
     )
-    description = models.TextField(blank=True)
+    description = models.TextField(blank=True, null=True)
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
@@ -105,6 +105,12 @@ class Review(models.Model):
     class Meta:
         verbose_name = 'Отзывы'
         ordering = ('id',)
+        constraints = [
+            models.UniqueConstraint(
+                fields=['author', 'title'],
+                name='unique_rewiew'
+            ),
+        ]
 
 
 class Comment(models.Model):

@@ -11,7 +11,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Category, Comment, Genre, Review, Title
 
 from .filters import TitlesFilter
-from .permissions import IsAdmin, IsAdminOrModeratirOrAuthor, IsAdminOrReadOnly
+from .permissions import (IsAdminOrModeratirOrAuthor, IsAdminOrReadOnly,
+                          IsAdminOrSuperUser)
 from .serializers import (AuthorSerializer, CategorySerializer,
                           CommentSerializer, GenreSerializer, ReviewSerializer,
                           SignUpSerializer, TitleReadSerializer,
@@ -75,7 +76,7 @@ class UserViewSet(viewsets.ModelViewSet):
     """Админ получает список пользователей или создает нового"""
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAdmin, ]
+    permission_classes = [IsAdminOrSuperUser, ]
     lookup_field = 'username'
     search_fields = ('username', )
 
@@ -99,7 +100,7 @@ class MeView(APIView):
                     user,
                     data=request.data,
                     partial=True)
-                if serializer.is_valid():
+                if serializer.is_valid(raise_exception=True):
                     serializer.save()
                     return Response(serializer.data, status=status.HTTP_200_OK)
             else:

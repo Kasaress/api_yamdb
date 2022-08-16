@@ -1,4 +1,6 @@
 import datetime as dt
+from enum import unique
+from unicodedata import category
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
@@ -17,8 +19,9 @@ class SignUpSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(
         max_length=254, required=True,
         validators=[UniqueValidator(queryset=User.objects.all())])
-    username = serializers.CharField(
-        max_length=150, required=True,
+    username = serializers.RegexField(
+        regex=r'^[\w.@+-]',
+        max_length=150,
         validators=[UniqueValidator(queryset=User.objects.all())])
 
     class Meta:
@@ -39,8 +42,11 @@ class TokenSerializer(serializers.ModelSerializer):
     """Сериалайзер для получения токена.
        Проверяет наличие username и валидирует
        код подтверждения."""
-    username = serializers.CharField(
-        required=True)
+
+    username = serializers.RegexField(
+        regex=r'^[\w.@+-]',
+        max_length=150,
+        validators=[UniqueValidator(queryset=User.objects.all())])
     confirmation_code = serializers.CharField(
         required=True)
 
@@ -62,13 +68,25 @@ class TokenSerializer(serializers.ModelSerializer):
     def validate_username(self, username):
         if not username:
             raise serializers.ValidationError(
-                "Поле username не должно быть пустым"
+                'Поле username не должно быть пустым'
             )
         return username
 
 
 class UserSerializer(serializers.ModelSerializer):
     """Сериализатор для кастомной модели пользователя"""
+
+    username = serializers.RegexField(
+        regex=r'^[\w.@+-]',
+        max_length=150,
+        validators=[UniqueValidator(queryset=User.objects.all())])
+
+    def validate_username(self, value):
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError(
+                'Пользователь с таким именем уже существует!')
+        return value
+
     class Meta:
         model = User
         fields = (
@@ -89,6 +107,16 @@ class AuthorSerializer(serializers.ModelSerializer):
 
 class CategorySerializer(serializers.ModelSerializer):
     """Сериализатор для категорий."""
+
+    slug = serializers.SlugField(
+        max_length=50, min_length=None, allow_blank=False)
+
+    def validate_slug(self, value):
+        if Category.objects.filter(slug=value).exists():
+            raise serializers.ValidationError(
+                'Категория с таким slug уже существует!')
+        return value
+
     class Meta:
         model = Category
         fields = ('name', 'slug',)
@@ -104,7 +132,7 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitleReadSerializer(serializers.ModelSerializer):
-    """Сериализатор для произведений."""  # Поправить
+    """Сериализатор для просмотра произведений."""
     category = CategorySerializer(many=False, read_only=True)
     genre = GenreSerializer(many=True, read_only=True)
     description = serializers.CharField(required=False)
@@ -116,7 +144,7 @@ class TitleReadSerializer(serializers.ModelSerializer):
 
 
 class TitleWriteSerializer(serializers.ModelSerializer):
-    """Сериализатор для произведений."""  # Поправить
+    """Сериализатор для изменения произведений."""
     genre = serializers.SlugRelatedField(
         slug_field='slug',
         many=True,

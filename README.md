@@ -24,6 +24,7 @@ _cd api_yamdb_
 **Run Migration:**\
 _python manage.py makemigrations_
 _python manage.py migrate_
+_py manage.py createsuperuser_
 
 **Start project:**\
 _python manage.py runserver_
@@ -38,6 +39,9 @@ Pytest-django==4.4.0
 Pytest-pythonpath==0.7.3
 Django-filter==2.2.0
 Djangorestframework-simplejwt=5.2.0_
+
+**API DOC**
+<http://127.0.0.1:8000/redoc/>
 
 **TECHNOLOGY:**
 _Python 3.8

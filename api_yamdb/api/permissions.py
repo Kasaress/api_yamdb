@@ -1,13 +1,14 @@
 from rest_framework import permissions
 
 
-class IsAdmin(permissions.BasePermission):
+class IsAdminOrSuperUser(permissions.BasePermission):
     """Проверка прав администратора."""
     message = 'Нужны права администратора'
 
     def has_permission(self, request, view):
-        if request.user.is_authenticated:
-            return request.user.role == 'admin' or request.user.is_superuser
+        return (request.user.is_authenticated
+                and (request.user.role == 'admin'
+                     or request.user.is_superuser))
 
 
 class IsAdminOrReadOnly(permissions.BasePermission):

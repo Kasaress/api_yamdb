@@ -113,6 +113,13 @@ class TitleReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Title
         fields = '__all__'
+        read_only_fields = (
+            'id',
+            'name',
+            'year',
+            'description',
+            'category',
+            'genre')
 
 
 class TitleWriteSerializer(serializers.ModelSerializer):

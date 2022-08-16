@@ -2,31 +2,54 @@
 
 ![Logo](https://cdn-irec.r-99.com/sites/default/files/product-images/399872/EOXOqQkXnjTMTRnIpMUSvQ.jpg)
 
-The YaMDb project collects reviews (Review) of users on works (Titles).\
-The works are divided into categories: "Books", "Films", "Music".\
-The works themselves are not stored in YaMDb; you cannot watch a movie or listen to music here.\
-There are works in each category: books, films or music.\
-A work can be assigned a genre (Genre) from the list of preset ones (for example, "Fairy Tale", "Rock" or "Arthouse"). New genres can only be created by the administrator.\
-Grateful or indignant users leave text reviews (Review) for the works and rate the product in the range from one to ten; a rating (integer) is formed from the user ratings. 
 
-**SETTING UP AND STARTING THE SERVER:**\
-**Create and activate virtual environment:**\
-_python -m venv venv_ \
-_Source venv/Scripts/activate_
+Проект Yamdb собирает отзывы (Review) пользователей на произведения (Titles).\
+Работы разделены на категории: «Книги», «Фильмы», «Музыка».\
+Сами произведения в Yamdb не хранятся; здесь нельзя смотреть кино или слушать музыку.\
+В каждой категории есть работы: книги, фильмы или музыка.\
+Произведению может быть присвоен жанр (Жанр) из списка предустановленных (например, «Сказка», «Рок» или «Артхаус»).\
+Новые жанры может создавать только администратор.\
+Благодарные или возмущенные пользователи оставляют текстовые отзывы (Review) на работы и оценивают в диапазоне от одного до десяти; рейтинг формируется из оценок пользователей.
 
-**Install dependencies from a file requirements.txt:**\
-_pip install -r requirements.txt_	
+### Настройка и запуск сервера: 
+**Клонировать репозиторий**
+```bash
+  git clone https://link-to-project
+```
+**Создать и активировать виртуальную среду:**
+```bash
+  python -m venv venv
+```
+``` bash
+  Source venv/Scripts/activate
+```
 
-**Go to main folder and run migrations:**\
-_cd api_yamdb_
+**Установить зависимости из файла requirements.txt:**
+```bash
+pip install -r requirements.txt
+```
 
-**Run Migration:**\
-_python manage.py migrate_
+**Перейдите в основную папку:**
+```bash
+cd api_yamdb
+```
 
-**Start project:**\
-_python manage.py runserver_
+**Создайте базу данных из CSV файлов:**
+```bash
+python manage.py dbpop
+```
 
-**DEPENDENCIES:**\
+**Выполните миграцию:**
+```bash
+python manage.py migrate
+```
+
+**Запустите проект:**
+```bash
+python manage.py runserver
+```
+
+### Зависимости
 _Request==2.26.0
 Django==2.2.16
 Djangorestframework==3.12.4
@@ -37,13 +60,14 @@ Pytest-pythonpath==0.7.3
 Django-filter==2.2.0
 Djangorestframework-simplejwt=5.2.0_
 
-**TECHNOLOGY:**
+### Технологии:
 _Python 3.8
 Django 2.2.16
 Djangorestframework 3.12.4
 Redoc_
 
-## Authors
+### Авторы  🔗
 
-- [Yana Bubnova](https://github.com/Kasaress)
-- [@p1rt-py](https://github.com/p1rt-py)
+- [Yana Bubnova](https://github.com/Kasaress) 
+- [p1rt-py](https://github.com/p1rt-py)
+- [am-practicum](https://github.com/am-practicum)

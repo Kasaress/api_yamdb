@@ -148,7 +148,7 @@ class Comment(models.Model):
 #         on_delete=models.CASCADE,
 #         related_name='reviews'
 #     )
-#
+
 #     class Meta:
 #         abstract = True
 #         ordering = ('id',)
@@ -158,8 +158,8 @@ class Comment(models.Model):
 #                 name='unique_rewiew'
 #             ),
 #         ]
-#
-#
+
+
 # class Review(ParentingModel):
 #     """Отзывы."""
 #     title = models.ForeignKey(
@@ -171,12 +171,12 @@ class Comment(models.Model):
 #         validators=[MinValueValidator(1),
 #                     MaxValueValidator(10)]
 #     )
-#
+
 #     class Meta:
 #         verbose_name = 'Отзывы'
 #         unique_together = ('author', 'title',)
-#
-#
+
+
 # class Comment(ParentingModel):
 #     """Комментарии."""
 #     author = models.ForeignKey(
@@ -191,6 +191,6 @@ class Comment(models.Model):
 #     )
 #     text = models.TextField()
 #     pub_date = models.DateTimeField(auto_now_add=True, db_index=True)
-#
+
 #     class Meta:
 #         verbose_name = 'Комментарии'

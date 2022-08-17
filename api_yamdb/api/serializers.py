@@ -46,7 +46,7 @@ class TokenSerializer(serializers.ModelSerializer):
         max_length=150,
         validators=[UniqueValidator(queryset=User.objects.all())])
     confirmation_code = serializers.CharField(
-        required=True)
+        required=True)   # CharField, функция из utils генерирует строку
 
     class Meta:
         model = User

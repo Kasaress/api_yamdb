@@ -2,6 +2,7 @@ import datetime as dt
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
@@ -153,10 +154,11 @@ class TitleWriteSerializer(serializers.ModelSerializer):
     genre = serializers.SlugRelatedField(
         slug_field='slug',
         many=True,
-        queryset=Genre.objects.all())
+        queryset=Genre.objects.all(),
+        validators=[MinValueValidator(0), MaxValueValidator(50)],)
     category = serializers.SlugRelatedField(
         slug_field='slug',
-        queryset=Category.objects.all())
+        queryset=Category.objects.all(),)
     year = serializers.IntegerField()
 
     class Meta:

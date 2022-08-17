@@ -11,21 +11,22 @@
 Новые жанры может создавать только администратор.\
 Благодарные или возмущенные пользователи оставляют текстовые отзывы (Review) на работы и оценивают в диапазоне от одного до десяти; рейтинг формируется из оценок пользователей.
 
-### Настройка и запуск сервера: 
+### Настройка и запуск сервера:
 **Клонировать репозиторий**
 ```bash
-  git clone https://link-to-project
+git clone https://link-to-project
 ```
 **Создать и активировать виртуальную среду:**
 ```bash
-  python -m venv venv
+python -m venv venv
 ```
 ``` bash
-  Source venv/Scripts/activate
+source venv/Scripts/activate
 ```
 
 **Установить зависимости из файла requirements.txt:**
 ```bash
+python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
@@ -68,6 +69,6 @@ Redoc_
 
 ### Авторы  🔗
 
-- [Yana Bubnova](https://github.com/Kasaress) 
+- [Yana Bubnova](https://github.com/Kasaress)
 - [p1rt-py](https://github.com/p1rt-py)
 - [am-practicum](https://github.com/am-practicum)

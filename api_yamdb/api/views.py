@@ -83,6 +83,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
 class MeView(APIView):
     """Пользователь может посмотреть свой профиль и изменить его"""
+
     def get(self, request):
         if request.user.is_authenticated:
             user = get_object_or_404(User, id=request.user.id)
@@ -167,31 +168,24 @@ class ReviewViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter]
     serializer_class = ReviewSerializer
 
+    def title_query(self):
+        return get_object_or_404(Title, id=self.kwargs.get('title_id'))
+
     def get_queryset(self):
-        title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
-        new_queryset = Review.objects.filter(title=title.id)
-        return new_queryset
+        return Review.objects.filter(title=self.title_query().id)
 
     def perform_create(self, serializer):
-        title = get_object_or_404(
-            Title,
-            pk=self.kwargs.get('title_id'))
-        serializer.save(author=self.request.user, title=title)
+        serializer.save(author=self.request.user, title=self.title_query())
 
 
-class CommentViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAdminOrModeratirOrAuthor]
-    pagination_class = PageNumberPagination
-    filter_backends = [filters.SearchFilter]
+class CommentViewSet(ReviewViewSet):
     serializer_class = CommentSerializer
 
+    def review_query(self):
+        return get_object_or_404(Review, id=self.kwargs.get('review_id'))
+
     def get_queryset(self):
-        review = get_object_or_404(Review, id=self.kwargs.get('review_id'))
-        new_queryset = Comment.objects.filter(review=review.id)
-        return new_queryset
+        return Comment.objects.filter(review=self.review_query().id)
 
     def perform_create(self, serializer):
-        review = get_object_or_404(
-            Review,
-            pk=self.kwargs.get('review_id'))
-        serializer.save(author=self.request.user, review=review)
+        serializer.save(author=self.request.user, review=self.review_query())

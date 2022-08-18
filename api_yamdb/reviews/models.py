@@ -1,5 +1,4 @@
 import datetime as dt
-from sre_parse import CATEGORIES
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
@@ -127,5 +126,3 @@ class Comment(ParentingModel):
         ordering = ['-id']
         verbose_name = 'Комментарии'
         ordering = ['id', ]
-
-

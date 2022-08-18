@@ -14,7 +14,7 @@
 ### Настройка и запуск сервера:
 **Клонировать репозиторий**
 ```bash
-git clone https://link-to-project
+git clone https://github.com/Kasaress/api_yamdb.git
 ```
 **Создать и активировать виртуальную среду:**
 ```bash

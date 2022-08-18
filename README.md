@@ -14,7 +14,7 @@
 ### Настройка и запуск сервера:
 **Клонировать репозиторий**
 ```bash
-git clone https://github.com/Kasaress/api_yamdb.git
+git clone https://github.com/p1rt-py/api_yamdb
 ```
 **Создать и активировать виртуальную среду:**
 ```bash
@@ -27,6 +27,8 @@ source venv/Scripts/activate
 **Установить зависимости из файла requirements.txt:**
 ```bash
 python -m pip install --upgrade pip
+```
+```bash
 pip install -r requirements.txt
 ```
 

@@ -43,7 +43,7 @@ class CustomUser(AbstractUser):  # type: ignore
         choices=ROLE_CHOICES,
         default='user'
     )
-    confirmation_code: int = models.CharField(
+    confirmation_code: str = models.CharField(
         max_length=5, null=True,
         verbose_name='Код подтверждения'
     )

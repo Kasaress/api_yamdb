@@ -1,6 +1,7 @@
 import os
 from datetime import timedelta
 
+print(f'вот же {os. getcwd()}' )
 from dotenv import load_dotenv
 
 load_dotenv()

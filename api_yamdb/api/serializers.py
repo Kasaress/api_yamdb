@@ -7,8 +7,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from reviews.models import Category, Comment, Genre, Review, Title
-
-User = get_user_model()
+from users.models import CustomUser as User
 
 
 class SignUpSerializer(serializers.ModelSerializer):
@@ -45,7 +44,8 @@ class TokenSerializer(serializers.ModelSerializer):
     username = serializers.RegexField(
         regex=r'^[\w.@+-]',
         max_length=150,
-        validators=[UniqueValidator(queryset=User.objects.all())])
+        # validators=[UniqueValidator(queryset=User.objects.all())]
+        )
     confirmation_code = serializers.CharField(
         required=True)   # CharField, функция из utils генерирует строку
 
@@ -79,19 +79,19 @@ class UserSerializer(serializers.ModelSerializer):
         regex=r'^[\w.@+-]',
         max_length=150,
         validators=[UniqueValidator(queryset=User.objects.all())])
-
-    def validate_username(self, value):
-        if User.objects.filter(username=value).exists():
-            raise serializers.ValidationError(
-                'Пользователь с таким именем уже существует!')
-        return value
-
     class Meta:
         model = User
         fields = (
             'username', 'email',
             'first_name', 'last_name',
             'bio', 'role',)
+    
+    def validate_username(self, value):
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError(
+                'Пользователь с таким именем уже существует!')
+        return value
+
 
 
 class AuthorSerializer(serializers.ModelSerializer):
@@ -110,16 +110,17 @@ class CategorySerializer(serializers.ModelSerializer):
     slug = serializers.SlugField(
         max_length=50, min_length=None, allow_blank=False)
 
+    class Meta:
+        model = Category
+        fields = ('name', 'slug',)
+        lookup_field = 'slug'
+        
     def validate_slug(self, value):
         if Category.objects.filter(slug=value).exists():
             raise serializers.ValidationError(
                 'Категория с таким slug уже существует!')
         return value
 
-    class Meta:
-        model = Category
-        fields = ('name', 'slug',)
-        lookup_field = 'slug'
 
 
 class GenreSerializer(serializers.ModelSerializer):

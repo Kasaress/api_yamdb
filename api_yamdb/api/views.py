@@ -25,8 +25,6 @@ User = get_user_model()
 
 class RegisterView(APIView):
     """Регистирирует пользователя и отправляет ему код подтверждения."""
-    permission_classes = (AllowAny,)
-
     def post(self, request):
         serializer = SignUpSerializer(data=request.data)
         serializer.is_valid()
@@ -49,8 +47,6 @@ class RegisterView(APIView):
 
 class TokenView(APIView):
     """Проверяет код подтверждения и отправляет токен."""
-    permission_classes = [AllowAny, ]
-
     def post(self, request):
         serializer = TokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

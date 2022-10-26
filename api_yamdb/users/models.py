@@ -1,11 +1,17 @@
 
+from email.policy import default
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+USER = 'user'
+MODERATOR = 'moderator'
+ADMIN = 'admin'
+
 ROLE_CHOICES = (
-    ('user', 'user'),
-    ('moderator', 'moderator'),
-    ('admin', 'admin'),
+    (USER, 'Пользователь'),
+    (MODERATOR, 'Модератор'),
+    (ADMIN, 'Администратор'),
 )
 
 
@@ -39,13 +45,14 @@ class CustomUser(AbstractUser):  # type: ignore
         blank=True
     )
     role: str = models.CharField(
-        max_length=9,
+        max_length=len(max(ROLE_CHOICES)),
         choices=ROLE_CHOICES,
         default='user'
     )
     confirmation_code: str = models.CharField(
         max_length=5, null=True,
-        verbose_name='Код подтверждения'
+        verbose_name='Код подтверждения',
+        default=' '
     )
 
     class Meta:

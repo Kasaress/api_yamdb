@@ -1,11 +1,9 @@
 import datetime as dt
 
-from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-
-User = get_user_model()
+from users.models import CustomUser as User
 
 
 def validate_year(value):

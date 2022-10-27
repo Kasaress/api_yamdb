@@ -15,7 +15,7 @@ class SignUpSerializer(serializers.Serializer, UserValidatorMixin):
     """Сериалайзер для регистрации."""
     email = serializers.EmailField(
         max_length=settings.EMAIL_LENGTH, required=True,
-        )
+    )
     username = serializers.CharField(
         required=True)
 
@@ -44,15 +44,16 @@ class TokenSerializer(serializers.Serializer, UserValidatorMixin):
 class UserSerializer(serializers.ModelSerializer, UserValidatorMixin):
     """Сериализатор для кастомной модели пользователя"""
     username = serializers.CharField(
-        required=True, 
+        required=True,
         validators=[UniqueValidator(queryset=User.objects.all())])
+
     class Meta:
         model = User
         fields = (
             'username', 'email',
             'first_name', 'last_name',
             'bio', 'role',)
-    
+
 
 class AuthorSerializer(UserSerializer):
     """Сериализатор для изменения профиля автором"""
@@ -69,13 +70,12 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         fields = ('name', 'slug',)
         lookup_field = 'slug'
-        
+
     def validate_slug(self, value):
         if Category.objects.filter(slug=value).exists():
             raise serializers.ValidationError(
                 'Категория с таким slug уже существует!')
         return value
-
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -122,7 +122,7 @@ class TitleWriteSerializer(serializers.ModelSerializer):
 
     def to_representation(self, value):
         return TitleReadSerializer(self.instance).data
-    
+
     def validate_year(self, value):
         if value > dt.datetime.now().year:
             raise serializers.ValidationError(
@@ -139,7 +139,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     score = serializers.IntegerField(
         validators=(MinValueValidator(settings.MIN_SCORE),
                     MaxValueValidator(settings.MAX_SCORE)))
-    
+
     class Meta:
         model = Review
         fields = '__all__'
@@ -160,7 +160,6 @@ class ReviewSerializer(serializers.ModelSerializer):
                 'Больше одного отзыва на title писать нельзя'
             )
         return data
-
 
 
 class CommentSerializer(serializers.ModelSerializer):

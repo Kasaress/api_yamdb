@@ -5,15 +5,14 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-from reviews.models import Category, Comment, Genre, Review, Title
+from reviews.models import Category, Genre, Review, Title
 from users.models import CustomUser as User
 
 from .filters import TitlesFilter
-from .permissions import (IsAdminOrModeratirOrAuthor, IsAdminOrReadOnly,
+from .permissions import (IsAdminOrModeratorOrAuthor, IsAdminOrReadOnly,
                           IsAdminOrSuperUser)
 from .serializers import (AuthorSerializer, CategorySerializer,
                           CommentSerializer, GenreSerializer, ReviewSerializer,
@@ -24,7 +23,8 @@ from .utils import generate_confirmation_code, send_confirmation_code
 
 
 class RegisterView(APIView):
-    """Регистирирует пользователя и отправляет ему код подтверждения на email."""
+    """Регистирирует пользователя и отправляет
+       ему код подтверждения на email."""
     def post(self, request):
         serializer = SignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -35,8 +35,9 @@ class RegisterView(APIView):
             User.objects.get_or_create(email=email, username=username)
         except IntegrityError:
             return Response(
-            'Пользователь с таким email или username уже зарегистрирован, но часть данных не совпадает',
-            status=status.HTTP_400_BAD_REQUEST)
+                'Пользователь с таким email или username уже зарегистрирован, \
+                    но часть данных не совпадает',
+                status=status.HTTP_400_BAD_REQUEST)
         User.objects.filter(email=email).update(
             confirmation_code=generate_confirmation_code())
         send_confirmation_code(email, confirmation_code)
@@ -54,8 +55,8 @@ class TokenView(APIView):
             User,
             username=username,
         )
-        if ((confirmation_code != user.confirmation_code) or
-            (confirmation_code == ' ')):
+        if ((confirmation_code != user.confirmation_code)
+                or (confirmation_code == ' ')):
             return Response(
                 'Confirmation code is invalid',
                 status=status.HTTP_400_BAD_REQUEST)
@@ -75,7 +76,7 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrSuperUser, ]
     lookup_field = 'username'
     search_fields = ('username', )
-    
+
     @action(
         methods=['GET', 'PATCH'],
         detail=False,
@@ -84,9 +85,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def user_info(self, request):
         user = get_object_or_404(User, id=request.user.id)
         serializer = AuthorSerializer(
-                    user,
-                    data=request.data,
-                    partial=True)
+            user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         if request.method == 'PATCH':
             serializer.save()
@@ -110,7 +109,7 @@ class CLDMixinSet(
 class GenreViewSet(CLDMixinSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    
+
 
 class CategoryViewSet(CLDMixinSet):
     queryset = Category.objects.all()
@@ -124,7 +123,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
     filterset_class = TitlesFilter
     ordering_fields = ('name',)
-    
+
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):
             return TitleReadSerializer
@@ -132,7 +131,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAdminOrModeratirOrAuthor]
+    permission_classes = [IsAdminOrModeratorOrAuthor]
     pagination_class = PageNumberPagination
     filter_backends = [filters.SearchFilter]
     serializer_class = ReviewSerializer
@@ -141,7 +140,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
         return get_object_or_404(Title, id=self.kwargs.get('title_id'))
 
     def get_queryset(self):
-        return self.title_query().reviews.all()        
+        return self.title_query().reviews.all()
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user, title=self.title_query())

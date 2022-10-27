@@ -12,25 +12,26 @@ class GenreCategory(models.Model):
     class Meta:
         abstract = True
         ordering = ['-id']
-        verbose_name = 'Жанр-Категория' #??
-        verbose_name_plural = 'Жанры-Категории' #??
+        verbose_name = 'Жанр-Категория'
+        verbose_name_plural = 'Жанры-Категории'
 
     def __str__(self):
         return self.name
-    
+
+
 class Genre(GenreCategory):
     """Жанры произведений."""
     class Meta(GenreCategory.Meta):
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
-    
+
 
 class Category(GenreCategory):
     """Категории произведение."""
     class Meta(GenreCategory.Meta):
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
-        
+
 
 class Title(models.Model):
     """Произведения."""
@@ -62,6 +63,8 @@ class Title(models.Model):
         verbose_name_plural = 'Произведения'
         ordering = ('name',)
 
+    def __str__(self):
+        return self.name
 
 
 class GenreTitle(models.Model):
@@ -88,7 +91,7 @@ class ParentingModel(models.Model):
     class Meta:
         abstract = True
         ordering = ['-pub_date']
-        
+
     def __str__(self):
         return self.text[:settings.SHORT_TEXT_LENGTH]
 
@@ -104,6 +107,7 @@ class Review(ParentingModel):
         validators=[MinValueValidator(settings.MIN_SCORE),
                     MaxValueValidator(settings.MAX_SCORE)]
     )
+
     class Meta(ParentingModel.Meta):
         ordering = ['-id']
         verbose_name = 'Отзыв'

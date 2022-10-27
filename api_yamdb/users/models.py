@@ -11,6 +11,7 @@ ROLE_CHOICES = (
     (settings.ADMIN, 'Администратор'),
 )
 
+
 class UserValidatorMixin:
     username = models.CharField(
         max_length=settings.USER_NAMES_LENGTH,
@@ -24,7 +25,7 @@ class UserValidatorMixin:
     )
 
     def validate_username(self, value):
-        if value == "me":
+        if value == 'me':
             raise ValidationError(
                 "Запрещено использовать 'me' в качестве никнейма"
             )
@@ -84,3 +85,12 @@ class CustomUser(AbstractUser, UserValidatorMixin):  # type: ignore
     def __str__(self) -> str:
         """Строковое представление модели (отображается в консоли)."""
         return self.username
+
+    @property
+    def is_admin(self):
+        return ((self.role == settings.ADMIN)
+                or self.is_superuser or self.is_staff)
+
+    @property
+    def is_moderator(self):
+        return self.role == settings.MODERATOR

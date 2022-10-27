@@ -1,17 +1,13 @@
 
-from email.policy import default
 
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-USER = 'user'
-MODERATOR = 'moderator'
-ADMIN = 'admin'
-
 ROLE_CHOICES = (
-    (USER, 'Пользователь'),
-    (MODERATOR, 'Модератор'),
-    (ADMIN, 'Администратор'),
+    (settings.USER, 'Пользователь'),
+    (settings.MODERATOR, 'Модератор'),
+    (settings.ADMIN, 'Администратор'),
 )
 
 

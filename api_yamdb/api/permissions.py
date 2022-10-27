@@ -1,8 +1,6 @@
+from django.conf import settings
 from rest_framework import permissions
 
-USER = 'user'
-MODERATOR = 'moderator'
-ADMIN = 'admin'
 
 class IsAdminOrSuperUser(permissions.BasePermission):
     """Проверка прав администратора."""
@@ -10,7 +8,7 @@ class IsAdminOrSuperUser(permissions.BasePermission):
 
     def has_permission(self, request, view):
         return (request.user.is_authenticated
-                and (request.user.role == ADMIN
+                and (request.user.role == settings.ADMIN
                      or request.user.is_superuser))
 
 
@@ -21,7 +19,7 @@ class IsAdminOrReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):
         return (request.method in permissions.SAFE_METHODS
                 or (request.user.is_authenticated and (
-                    request.user.role == ADMIN
+                    request.user.role == settings.ADMIN
                     or request.user.is_superuser)))
 
 
@@ -39,7 +37,7 @@ class IsAdminOrModeratirOrAuthor(permissions.BasePermission):
         return (
             request.method in permissions.SAFE_METHODS
             or request.user.is_superuser
-            or request.user.role == ADMIN
-            or request.user.role == MODERATOR
+            or request.user.role == settings.ADMIN
+            or request.user.role == settings.MODERATOR
             or request.user == obj.author
         )

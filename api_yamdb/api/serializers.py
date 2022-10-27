@@ -1,6 +1,5 @@
 import datetime as dt
 
-from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.shortcuts import get_object_or_404
@@ -10,17 +9,17 @@ from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import CustomUser as User
 
 
-class SignUpSerializer(serializers.ModelSerializer):
+class SignUpSerializer(serializers.Serializer):
     """Сериалайзер для регистрации.
        Следит за уникальностью полей email и username,
        валидирует username"""
     email = serializers.EmailField(
         max_length=254, required=True,
-        validators=[UniqueValidator(queryset=User.objects.all())])
+        )
     username = serializers.RegexField(
         regex=r'^[\w.@+-]',
         max_length=150,
-        validators=[UniqueValidator(queryset=User.objects.all())])
+        )
 
     class Meta:
         model = User
@@ -36,7 +35,7 @@ class SignUpSerializer(serializers.ModelSerializer):
         return username
 
 
-class TokenSerializer(serializers.ModelSerializer):
+class TokenSerializer(serializers.Serializer):
     """Сериалайзер для получения токена.
        Проверяет наличие username и валидирует
        код подтверждения."""
@@ -135,7 +134,7 @@ class TitleReadSerializer(serializers.ModelSerializer):
     """Сериализатор для просмотра произведений."""
     category = CategorySerializer(many=False, read_only=True)
     genre = GenreSerializer(many=True, read_only=True)
-    description = serializers.CharField(required=False)
+    # description = serializers.CharField(required=False)
     rating = serializers.IntegerField(read_only=True)
 
     class Meta:

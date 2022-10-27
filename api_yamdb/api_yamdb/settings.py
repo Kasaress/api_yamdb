@@ -3,8 +3,6 @@ from datetime import timedelta
 
 from dotenv import load_dotenv
 
-print(f'вот же {os. getcwd()}')
-
 load_dotenv()
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -148,3 +146,7 @@ EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
 CONTACT_EMAIL = os.getenv('CONTACT_EMAIL')
 
 CONFIRMATION_CODE_LEN = 5
+USER = 'user'
+MODERATOR = 'moderator'
+ADMIN = 'admin'
+SHORT_TEXT_LEN = 15

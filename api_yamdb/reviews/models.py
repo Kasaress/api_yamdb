@@ -1,16 +1,8 @@
-import datetime as dt
-
-from django.core.exceptions import ValidationError
+from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from reviews.validators import validate_year
 from users.models import CustomUser as User
-
-
-def validate_year(value):
-    if value > dt.datetime.now().year:
-        raise ValidationError(
-            'Значение года не может быть больше текущего')
-    return value
 
 
 class GenreCategory(models.Model):
@@ -19,38 +11,42 @@ class GenreCategory(models.Model):
 
     class Meta:
         abstract = True
+        ordering = ['-id']
 
 
 class Genre(GenreCategory):
     """Жанры произведений."""
-    class Meta:
-        ordering = ['-id']
+    class Meta(GenreCategory.Meta):
         verbose_name = 'Жанр'
-
+        verbose_name_plural = 'Жанры'
+        
     def __str__(self):
         return self.name
 
 
 class Category(GenreCategory):
     """Категории произведение."""
-    class Meta:
-        ordering = ['-id']
+    class Meta(GenreCategory.Meta):
         verbose_name = 'Категория'
-
+        verbose_name_plural = 'Категории'
+        
+    def __str__(self):
+        return self.name
 
 class Title(models.Model):
     """Произведения."""
     name = models.CharField(max_length=256)
     year = models.PositiveIntegerField(
         validators=[validate_year],
-        verbose_name='Год выпуска'
+        verbose_name='Год выпуска',
+        db_index=True
     )
     description = models.TextField(blank=True, null=True)
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
         related_name='titles',
-        verbose_name='Категория',
+        verbose_name='Категории',
         blank=True,
         null=True,
         help_text='Выберите категорию',
@@ -58,15 +54,14 @@ class Title(models.Model):
     genre = models.ManyToManyField(
         Genre,
         through='GenreTitle',
-        verbose_name='Жанр',
+        verbose_name='Жанры',
         help_text='Выберите жанр'
     )
 
     class Meta:
         verbose_name = 'Произведение'
+        ordering = ['name']
 
-    def __str__(self):
-        return self.name
 
 
 class GenreTitle(models.Model):
@@ -92,6 +87,10 @@ class ParentingModel(models.Model):
 
     class Meta:
         abstract = True
+        ordering = ['-pub_date']
+        
+    def __str__(self):
+        return self.text[:settings.SHORT_TEXT_LEN]
 
 
 class Review(ParentingModel):
@@ -101,15 +100,19 @@ class Review(ParentingModel):
         on_delete=models.CASCADE,
         related_name='reviews'
     )
-    score = models.IntegerField(
+    score = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(1),
                     MaxValueValidator(10)]
     )
-
-    class Meta:
+    class Meta(ParentingModel.Meta):
         ordering = ['-id']
-        verbose_name = 'Отзывы'
-        unique_together = ('author', 'title',)
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзывы'
+        constraints = [
+            models.UniqueConstraint(
+                fields=('title', 'author',),
+                name='unique review'
+            )]
 
 
 class Comment(ParentingModel):
@@ -120,7 +123,7 @@ class Comment(ParentingModel):
         related_name="comments"
     )
 
-    class Meta:
+    class Meta(ParentingModel.Meta):
         ordering = ['-id']
-        verbose_name = 'Комментарии'
-        ordering = ['id', ]
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'

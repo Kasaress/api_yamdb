@@ -2,7 +2,7 @@ from django.db import IntegrityError
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, mixins, status, viewsets
+from rest_framework import filters, mixins, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny
@@ -79,24 +79,19 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(
         methods=['GET', 'PATCH'],
         detail=False,
-        permission_classes=(IsAdminOrModeratirOrAuthor,),
+        permission_classes=(permissions.IsAuthenticated,),
         url_path='me')
     def user_info(self, request):
         user = get_object_or_404(User, id=request.user.id)
-        if request.method == 'PATCH':
-            serializer = AuthorSerializer(
+        serializer = AuthorSerializer(
                     user,
                     data=request.data,
                     partial=True)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(
-                serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST)
-        else:
-            serializer = UserSerializer(user)
-            return Response(serializer.data)
+        serializer.is_valid(raise_exception=True)
+        if request.method == 'PATCH':
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data)
 
 
 class CLDMixinSet(
@@ -124,11 +119,12 @@ class CategoryViewSet(CLDMixinSet):
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.annotate(
-        rating=Avg('reviews__score')).order_by('id')
+        rating=Avg('reviews__score'))
     permission_classes = [IsAdminOrReadOnly]
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
     filterset_class = TitlesFilter
-
+    ordering_fields = ('name',)
+    
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):
             return TitleReadSerializer
@@ -145,7 +141,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
         return get_object_or_404(Title, id=self.kwargs.get('title_id'))
 
     def get_queryset(self):
-        return Review.objects.filter(title=self.title_query().id)
+        return self.title_query().reviews.all()        
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user, title=self.title_query())
@@ -158,7 +154,7 @@ class CommentViewSet(ReviewViewSet):
         return get_object_or_404(Review, id=self.kwargs.get('review_id'))
 
     def get_queryset(self):
-        return Comment.objects.filter(review=self.review_query().id)
+        return self.review_query().comments.all()
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user, review=self.review_query())

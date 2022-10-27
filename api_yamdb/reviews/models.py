@@ -6,23 +6,24 @@ from users.models import CustomUser as User
 
 
 class GenreCategory(models.Model):
-    name = models.CharField(max_length=50,)
-    slug = models.SlugField(max_length=50, unique=True)
+    name = models.CharField(max_length=settings.NAME_LENGTH,)
+    slug = models.SlugField(max_length=settings.SLUG_LENGTH, unique=True)
 
     class Meta:
         abstract = True
         ordering = ['-id']
+        verbose_name = 'Жанр-Категория' #??
+        verbose_name_plural = 'Жанры-Категории' #??
 
-
+    def __str__(self):
+        return self.name
+    
 class Genre(GenreCategory):
     """Жанры произведений."""
     class Meta(GenreCategory.Meta):
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
-        
-    def __str__(self):
-        return self.name
-
+    
 
 class Category(GenreCategory):
     """Категории произведение."""
@@ -30,12 +31,10 @@ class Category(GenreCategory):
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
         
-    def __str__(self):
-        return self.name
 
 class Title(models.Model):
     """Произведения."""
-    name = models.CharField(max_length=256)
+    name = models.CharField(max_length=settings.NAME_LENGTH)
     year = models.PositiveIntegerField(
         validators=[validate_year],
         verbose_name='Год выпуска',
@@ -60,7 +59,8 @@ class Title(models.Model):
 
     class Meta:
         verbose_name = 'Произведение'
-        ordering = ['name']
+        verbose_name_plural = 'Произведения'
+        ordering = ('name',)
 
 
 
@@ -90,7 +90,7 @@ class ParentingModel(models.Model):
         ordering = ['-pub_date']
         
     def __str__(self):
-        return self.text[:settings.SHORT_TEXT_LEN]
+        return self.text[:settings.SHORT_TEXT_LENGTH]
 
 
 class Review(ParentingModel):
@@ -101,8 +101,8 @@ class Review(ParentingModel):
         related_name='reviews'
     )
     score = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(1),
-                    MaxValueValidator(10)]
+        validators=[MinValueValidator(settings.MIN_SCORE),
+                    MaxValueValidator(settings.MAX_SCORE)]
     )
     class Meta(ParentingModel.Meta):
         ordering = ['-id']

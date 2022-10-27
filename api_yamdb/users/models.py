@@ -1,7 +1,8 @@
 
-
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator
 from django.db import models
 
 ROLE_CHOICES = (
@@ -10,8 +11,27 @@ ROLE_CHOICES = (
     (settings.ADMIN, 'Администратор'),
 )
 
+class UserValidatorMixin:
+    username = models.CharField(
+        max_length=settings.USER_NAMES_LENGTH,
+        verbose_name='Никнейм',
+        unique=True,
+        null=True,
+        validators=[RegexValidator(
+            regex=r'^[\w.@+-]+$',
+            message='Юзернейм содержит запрещенный символ'
+        )]
+    )
 
-class CustomUser(AbstractUser):  # type: ignore
+    def validate_username(self, value):
+        if value == "me":
+            raise ValidationError(
+                "Запрещено использовать 'me' в качестве никнейма"
+            )
+        return value
+
+
+class CustomUser(AbstractUser, UserValidatorMixin):  # type: ignore
     """Кастомная модель User.
        Позволяет при создании запрашивать емейл и юзернейм.
     """
@@ -19,21 +39,22 @@ class CustomUser(AbstractUser):  # type: ignore
         'Username',
         unique=True,
         blank=False,
-        max_length=150,
+        max_length=settings.USER_NAMES_LENGTH,
     )
     email: str = models.EmailField(
         'E-mail address',
         unique=True,
         blank=False,
+        max_length=settings.EMAIL_LENGTH,
     )
     first_name: str = models.CharField(
         'first name',
-        max_length=150,
+        max_length=settings.USER_NAMES_LENGTH,
         blank=True
     )
     last_name: str = models.CharField(
         'last name',
-        max_length=150,
+        max_length=settings.USER_NAMES_LENGTH,
         blank=True
     )
     bio: str = models.TextField(
@@ -46,7 +67,7 @@ class CustomUser(AbstractUser):  # type: ignore
         default='user'
     )
     confirmation_code: str = models.CharField(
-        max_length=5, null=True,
+        max_length=settings.CONFIRMATION_CODE_LEN, null=True,
         verbose_name='Код подтверждения',
         default=' '
     )
